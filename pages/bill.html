@@ -381,8 +381,6 @@
         <script>
 
 
-            // validate
-
             function pdfload() {
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF();
@@ -403,122 +401,110 @@
                 pdf.rect(margin, margin, pageWidth - 2 * margin, pageHeight - 2 * margin);
 
                 // Header Section
-                const headerHeight = (pageHeight - 2 * margin) * 0.3;
                 const totalWidth = pageWidth - 2 * margin;
                 const width60 = totalWidth * 0.6;
-
                 let currentY = margin;
 
-                // Header Title: "INVOICE BILL"
-                pdf.setFillColor(0, 0, 139); // Dark blue background
+                // Header Title
+                pdf.setFillColor(0, 0, 139);
                 pdf.rect(margin, currentY, width60, 12, 'F');
-                pdf.setTextColor(255, 255, 255); // White text
+                pdf.setTextColor(255, 255, 255);
                 pdf.setFontSize(14);
                 pdf.text("INVOICE BILL", margin + width60 / 2, currentY + 8, { align: "center" });
-
                 currentY += 12;
 
                 // Invoice No and Date rows
-                const rowHeight = 12;
+                const rowHeight = 10;
                 const subWidth30 = width60 * 0.3;
 
-                // Invoice No row
-                pdf.setTextColor(0, 0, 0); // Black text
+                pdf.setTextColor(0, 0, 0);
                 pdf.rect(margin, currentY, width60, rowHeight);
                 pdf.rect(margin, currentY, subWidth30, rowHeight);
-                pdf.text("Invoice No:", margin + 2, currentY + 8);
-                pdf.text(invoiceNo, margin + subWidth30 + 2, currentY + 8);
-
+                pdf.text("Invoice No:", margin + 2, currentY + 7);
+                pdf.text(invoiceNo, margin + subWidth30 + 2, currentY + 7);
                 currentY += rowHeight;
 
-                // Date row
                 pdf.rect(margin, currentY, width60, rowHeight);
                 pdf.rect(margin, currentY, subWidth30, rowHeight);
-                pdf.text("Date:", margin + 2, currentY + 8);
-                pdf.text(date, margin + subWidth30 + 2, currentY + 8);
-
+                pdf.text("Date:", margin + 2, currentY + 7);
+                pdf.text(date, margin + subWidth30 + 2, currentY + 7);
                 currentY += rowHeight;
 
-                // Customer Name row
-                pdf.rect(margin, currentY, width60, 47);
-                pdf.text("Customer Name:", margin + 2, currentY + 8);
+                pdf.rect(margin, currentY, width60, 40);
+                pdf.text("Customer Name:", margin + 2, currentY + 7);
                 pdf.setFontSize(14);
-                pdf.text(customerName, margin + width60 / 2, currentY + 24, { align: "center" });
+                pdf.text(customerName, margin + width60 / 2, currentY + 20, { align: "center" });
+                currentY += 40;
 
-                currentY += 47;
-
-                // Table Section
                 // Table Section
                 const headerXPositions = [margin, margin + 50, pageWidth - margin - 40];
                 const headerWidths = [50, pageWidth - 2 * margin - 90, 40];
 
-                // Center helper function
-                const centerText = (pdf, text, x, width) => {
-                    const textWidth = pdf.getTextWidth(text);
-                    const xOffset = x + (width - textWidth) / 2;
-                    return xOffset;
-                };
-
-                // Table Headers
+                pdf.setFontSize(12);
                 headerXPositions.forEach((xPos, index) => {
                     const width = headerWidths[index];
-                    pdf.rect(xPos, currentY, width, 10); // Draw the header cell
+                    pdf.rect(xPos, currentY, width, rowHeight);
                 });
-                pdf.text("S/N", margin + 25, currentY + 6, { align: "center" });
-                pdf.text("Description", margin + 50 + (pageWidth - 2 * margin - 90) / 2, currentY + 6, { align: "center" });
-                pdf.text("Amount", pageWidth - margin - 20, currentY + 6, { align: "center" });
-
-                currentY += 10;
+                pdf.text("S/N", margin + 25, currentY + rowHeight / 2 + 3, { align: "center" });
+                pdf.text("Description", margin + 50 + (pageWidth - 2 * margin - 90) / 2, currentY + rowHeight / 2 + 3, { align: "center" });
+                pdf.text("Amount", pageWidth - margin - 20, currentY + rowHeight / 2 + 3, { align: "center" });
+                currentY += rowHeight;
 
                 // Table Data
                 const rows = document.querySelectorAll('#itemTable tbody tr');
-                rows.forEach((row, index) => {
-                    const cells = row.querySelectorAll('td');
-                    const cellData = [
-                        String(index + 1), // S/N
-                        cells[1]?.querySelector('input')?.value || "N/A", // Description
-                        cells[2]?.querySelector('input')?.value || "0.00", // Amount
-                    ];
+                const maxRows = 10; // Fixed number of rows in the table
 
-                    // Calculate required row height based on the longest cell
-                    const padding = 5; // 5px padding
-                    const lineHeight = 7; // Increased line height for better readability
-                    const cellWidths = [50, pageWidth - 2 * margin - 90, 40]; // Widths for S/N, Description, Amount
+                // Fill the rows from the table or add empty rows to reach maxRows
+                for (let i = 0; i < maxRows; i++) {
+                    const row = rows[i];
+                    const cellData = row
+                        ? [
+                            String(i + 1), // Add "S/N" for rows with data
+                            row.querySelectorAll('td')[1]?.querySelector('input')?.value || "N/A",
+                            row.querySelectorAll('td')[2]?.querySelector('input')?.value || "0.00",
+                        ]
+                        : ["", "", ""]; // Empty "S/N" for rows without data
+
+                    const padding = 3;
+                    const lineHeight = 6;
+                    const cellWidths = [50, pageWidth - 2 * margin - 90, 40];
+
+                    // Calculate max lines and adjust row height only if text is large
                     const maxLines = cellData.map((data, i) => {
-                        const textWidth = pdf.getTextWidth(data);
-                        return Math.ceil(textWidth / (cellWidths[i] - padding * 2)); // Lines needed for the cell
+                        const lines = pdf.splitTextToSize(data, cellWidths[i] - padding * 2);
+                        return lines.length > 1 ? lines.length : 1;
                     });
-                    const rowHeight = Math.max(...maxLines) * lineHeight + padding * 2; // Height based on the tallest cell
+                    const dynamicRowHeight = Math.max(...maxLines) > 1 ? Math.max(...maxLines) * lineHeight + padding * 2 : rowHeight;
 
-                    const yStart = currentY;
+                    // Draw vertical borders
+                    pdf.line(margin, currentY, margin, currentY + dynamicRowHeight);
+                    pdf.line(margin + 50, currentY, margin + 50, currentY + dynamicRowHeight);
+                    pdf.line(pageWidth - margin - 40, currentY, pageWidth - margin - 40, currentY + dynamicRowHeight);
+                    pdf.line(pageWidth - margin, currentY, pageWidth - margin, currentY + dynamicRowHeight);
 
-                    // Draw cell borders
-                    pdf.rect(margin, yStart, 50, rowHeight); // S/N
-                    pdf.rect(margin + 50, yStart, pageWidth - 2 * margin - 90, rowHeight); // Description
-                    pdf.rect(pageWidth - margin - 40, yStart, 40, rowHeight); // Amount
-
-                    // Add text with padding and handle multiline, center-aligned
+                    // Add text inside cells
                     cellData.forEach((data, i) => {
-                        const xPos = [margin, margin + 50, pageWidth - margin - 40][i];
-                        const cellWidth = cellWidths[i];
+                        const xPos = headerXPositions[i];
+                        const cellWidth = headerWidths[i];
                         const lines = pdf.splitTextToSize(data, cellWidth - padding * 2);
                         const totalTextHeight = lines.length * lineHeight;
-                        const startY = yStart + (rowHeight - totalTextHeight) / 2 + padding; // Center text vertically
+                        const verticalOffset = (dynamicRowHeight - totalTextHeight) / 2;
 
                         lines.forEach((line, lineIndex) => {
-                            const textX = xPos + cellWidth / 2; // Center alignment horizontally
-                            const textY = startY + lineIndex * lineHeight; // Line height
+                            const textX = xPos + cellWidth / 2;
+                            const textY = currentY + verticalOffset + padding + lineIndex * lineHeight;
                             pdf.text(line, textX, textY, { align: "center" });
                         });
                     });
 
-                    currentY += rowHeight; // Move to the next row
-                });
+                    currentY += dynamicRowHeight;
+                }
 
+                // Add a closing line at the bottom of the table
+                pdf.line(margin, currentY, pageWidth - margin, currentY);
 
                 pdf.save('bill.pdf');
             }
-
 
 
 
