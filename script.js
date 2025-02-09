@@ -15,7 +15,7 @@ function loginCheck(event) {
     if (userName && password) {
       if (userName === "admin" && password === "1234") {
         // Redirect to the home page
-        window.location.href = 'pages/homePage.html';
+        window.location.href = './pages/homePage.html';
       } else {
         // Display an error message for incorrect credentials
         err.innerHTML = "Username and password do not match.";
