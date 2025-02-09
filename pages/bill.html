@@ -91,6 +91,12 @@
 
                             </select>
                         </div>
+
+                        <div>
+                            <label for="invoiceNumber" class="form-label">Invoice Number :</label>
+                            <input type="text" class="form-control input" id="invoiceNumber"
+                                placeholder="Enter Invoice Number"  required>
+                        </div>
                     </div>
 
 
@@ -202,6 +208,7 @@
                     const date = document.getElementById("dateField").value.trim();
                     const transactionType = document.getElementById("transactionType").value;
                     const transactionMode = document.getElementById("transactionMode").value;
+                    const invoiceNumber = document.getElementById("invoiceNumber").value;
                     const discription = document.getElementById("discription").value;
                     const initialPayment = document.getElementById("initialPayment").value;
                     const totalAmount = parseFloat(document.getElementById("credtotal").textContent || "0");
@@ -238,6 +245,10 @@
 
                     if (!transactionType) {
                         showAlert("Please select a transaction type.", 2500);
+                        return;
+                    }
+                    if (!invoiceNumber) {
+                        showAlert("Please enter Invoice Number.", 2500);
                         return;
                     }
 
@@ -288,8 +299,8 @@
                     const billsSnapshot = await getDocs(billsCollectionRef);
 
                     // Generate a new invoice number based on the document count
-                    const newInvoiceNo = billsSnapshot.size + 1; // `size` gives the number of documents
-                    const formattedInvoiceNo = `INV-${String(newInvoiceNo).padStart(3, '0')}`; // Format as INV-001, INV-002, etc.
+                    // const newInvoiceNo = billsSnapshot.size + 1; // `size` gives the number of documents
+                    // const formattedInvoiceNo = `INV-${String(newInvoiceNo).padStart(3, '0')}`; // Format as INV-001, INV-002, etc.
 
                     // Step 2: Collect customer and transaction details
                     const customerName = document.getElementById("customerNameName").value;
@@ -297,6 +308,7 @@
                     const date = document.getElementById("dateField").value;
                     const transactionType = document.getElementById("transactionType").value;
                     const transactionMode = document.getElementById("transactionMode").value;
+                    const invoiceNumber = document.getElementById("invoiceNumber").value;
                     const discription = document.getElementById("discription").value;
 
                     const rows = document.querySelectorAll('#itemTable tbody tr');
@@ -322,12 +334,13 @@
 
                     // Step 3: Prepare data for Firestore
                     const data = {
-                        invoiceNo: formattedInvoiceNo, // Use the formatted invoice number
+                         // Use the formatted invoice number
                         customerName,
                         phoneNumber,
                         date,
                         transactionType,
                         transactionMode,
+                        invoiceNumber,
                         items,
                         discription,
                         totalAmount,
@@ -339,8 +352,8 @@
                     // Step 4: Save the new invoice document to the `bills` collection
                     const docRef = await addDoc(billsCollectionRef, data);
 
-                    console.log("Transaction saved successfully with Invoice No:", formattedInvoiceNo);
-                    window.InvoiceNo = formattedInvoiceNo;
+                    console.log("Transaction saved successfully with Invoice No:", invoiceNumber);
+                    window.InvoiceNo = invoiceNumber;
                     window.customerName = customerName;
                     window.date = date;
                     window.discription = discription;
@@ -402,7 +415,7 @@
                 // Variables to display
                 const invoiceNo = window.InvoiceNo || "N/A";
                 const date = window.date || "N/A";
-                const discription = window.discription || "N/A";
+                const discription = window.discription || "";
                 const customerName = window.customerName || "N/A";
                 // Ensure totalAmount is a string
                 const totalAmount = String(window.totalAmount || "N/A");
