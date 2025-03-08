@@ -52,11 +52,11 @@
                                 placeholder="Enter Customer Name" required>
                         </div>
 
-                        <div>
+                        <!-- <div>
                             <label for="phoneNumber" class="form-label">Phone Number :</label>
                             <input type="tel" class="form-control input" id="phoneNumber"
                                 placeholder="Enter Phone Number" maxlength="10" required>
-                        </div>
+                        </div> -->
 
                     </div>
 
@@ -64,7 +64,7 @@
                     <div class="inputDiv">
                         <div>
                             <label for="dateField" class="form-label">Select Date:</label>
-                            <input type="text" id="dateField" class="form-control input" readonly
+                            <input type="text" id="dateField" class="form-control input" 
                                 placeholder="dd-mm-yyyy" required>
 
                         </div>
@@ -204,7 +204,7 @@
                 try {
                     // Perform validation
                     const customerName = document.getElementById("customerNameName").value.trim();
-                    const phoneNumber = document.getElementById("phoneNumber").value.trim();
+                    // const phoneNumber = document.getElementById("phoneNumber").value.trim();
                     const date = document.getElementById("dateField").value.trim();
                     const transactionType = document.getElementById("transactionType").value;
                     const transactionMode = document.getElementById("transactionMode").value;
@@ -233,10 +233,10 @@
                     //     return;
                     // }
 
-                    if (!phoneNumber || isNaN(phoneNumber) || phoneNumber.length !== 10) {
-                        showAlert("Please enter a valid 10-digit phone number.", 2500);
-                        return;
-                    }
+                    // if (!phoneNumber || isNaN(phoneNumber) || phoneNumber.length !== 10) {
+                    //     showAlert("Please enter a valid 10-digit phone number.", 2500);
+                    //     return;
+                    // }
 
                     if (!date) {
                         showAlert("Please select a date.", 2500);
@@ -298,13 +298,10 @@
                     const billsCollectionRef = collection(db, "bills");
                     const billsSnapshot = await getDocs(billsCollectionRef);
 
-                    // Generate a new invoice number based on the document count
-                    // const newInvoiceNo = billsSnapshot.size + 1; // `size` gives the number of documents
-                    // const formattedInvoiceNo = `INV-${String(newInvoiceNo).padStart(3, '0')}`; // Format as INV-001, INV-002, etc.
 
                     // Step 2: Collect customer and transaction details
                     const customerName = document.getElementById("customerNameName").value;
-                    const phoneNumber = document.getElementById("phoneNumber").value;
+                    // const phoneNumber = document.getElementById("phoneNumber").value;
                     const date = document.getElementById("dateField").value;
                     const transactionType = document.getElementById("transactionType").value;
                     const transactionMode = document.getElementById("transactionMode").value;
@@ -336,7 +333,7 @@
                     const data = {
                          // Use the formatted invoice number
                         customerName,
-                        phoneNumber,
+                        // phoneNumber,
                         date,
                         transactionType,
                         transactionMode,
@@ -432,7 +429,7 @@
                 let currentY = margin;
 
                 // Header Title
-                pdf.setFillColor(0, 0, 0);
+                pdf.setFillColor(30,99,140);
                 pdf.rect(margin, currentY, width60, 12, 'F');
                 pdf.setTextColor(255, 255, 255);
                 pdf.setFontSize(14);
@@ -606,7 +603,7 @@
                 const thankRowWidth = pageWidth - 2 * margin;
 
                 // Draw a background for the row
-                pdf.setFillColor(0, 0, 0); // Light gray background color
+                pdf.setFillColor(30,99,140);
                 pdf.rect(margin, thankRowY, thankRowWidth, thankRowHeight, "F"); // "F" fills the rectangle
 
                 // Add "Thank You" text inside the row, centered
@@ -678,7 +675,7 @@
                 if (!dateField.value) {
                     dateField.value = formatDate(today);
                 }
-                dateField.setAttribute('readonly', true);
+                dateField.setAttribute('readonly', false);
             });
 
             // Table Functionality
