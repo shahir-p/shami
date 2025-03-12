@@ -291,7 +291,7 @@ label {
 }
 @media (max-width: 376px) {
     table{
-        margin-left: -22px;
+        margin-left: 0px;
         
     }
 }
